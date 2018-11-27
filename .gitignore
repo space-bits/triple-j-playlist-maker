@@ -3,3 +3,6 @@ __pycache__
 .env
 config.json
 venv
+.cache-*
+
+
