@@ -69,11 +69,17 @@ def main():
     
     logger.info('Program finished')
 
+
 def add_to_playlist():
     '''Obtains the current playlist, and only add songs if they aren't already in the playlist
     '''
-    # do some stuff
+    
     pass
+
+def get_current_playlist(sp):
+    '''Returns a list of songs from spotify that are in the current playlist'''
+    playlist = []
+    return playlist
 
 
 def get_triple_j_recently_played():
