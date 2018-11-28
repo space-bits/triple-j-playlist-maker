@@ -39,7 +39,7 @@ def main():
     logger.info('Application starting for user \'%s\'' % (username))
     
     # api endpoint for the triple j radio service
-    triple_j_url = 'https://music.abcradio.net.au/api/v1/recordings/plays.json?limit=50&service=triplej'
+    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=75&service=triplej'
 
     # set the name for the playlist
     playlist_name = 'Triple J Recently Played'
@@ -120,8 +120,8 @@ def get_triple_j_recently_played(triple_j_url):
 
     # iterate over the json object and pull out the important data
     for track in tracks['items']:
-        title = track['title']
-        artist = track['artists'][0]['name']
+        title = track['recording']['title']
+        artist = track['recording']['artists'][0]['name']
         
         logger.info('Found track \'%s\' by \'%s\'' % (title, artist))
         songs.append({'track':title,'artist':artist})
