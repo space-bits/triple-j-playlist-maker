@@ -52,7 +52,7 @@ def main():
     # create the playlist, if it doesn't exist
     create_playlist(sp, username, playlist_name)
     
-    recently_played_songs = get_triple_j_recently_played()
+    recently_played_songs = get_triple_j_recently_played(triple_j_url)
     
     # create an empty list for storing the songs to be added to the playlist
     playlist_new_songs = []
@@ -89,7 +89,8 @@ def add_to_playlist(sp,songs_to_add,playlist_name):
                            % (track_id,playlist_name))
                 track = [track_id]
                 # ammend the playlist
-                sp.user_playlist_add_tracks(uid,playlist_id,track)
+                sp.user_playlist_add_tracks(uid,playlist_id,track,position=0) 
+                # add tracks to the front of the list
             else:
                 logger.info('Song with id \'%s\' already in playlist' % (track_id))
 
@@ -110,14 +111,13 @@ def get_current_playlist(sp, playlist_name):
     return ret_playlist
 
 
-def get_triple_j_recently_played():
+def get_triple_j_recently_played(triple_j_url):
     '''Get the list of recently played songs from Triple J; Strip any song titles 
     {feat. artist} as this query causes Spotify to return no tracks'''
     logger.info('Getting songs from Triple J...')
     songs = []
-    tracks = requests.get(
-            'https://music.abcradio.net.au/api/v1/recordings/plays.json?limit=5&service=triplej'
-            ).json()
+    tracks = requests.get(triple_j_url).json()
+
     # iterate over the json object and pull out the important data
     for track in tracks['items']:
         title = track['title']
