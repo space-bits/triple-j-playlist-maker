@@ -35,7 +35,6 @@ def main():
     Sets up the Spotipy user auth, queries for the existence of a playlist, 
     and creates it if it doesn't exist. 
     '''
-
     # my spotify username
     username = '011011000110111101110110011001'
     logger.info('Application starting for user \'%s\'' % (username))
@@ -53,38 +52,66 @@ def main():
     create_playlist(sp, username, playlist_name)
     
     recently_played_songs = get_triple_j_recently_played()
+    
     # create an empty list for storing the songs to be added to the playlist
     playlist_new_songs = []
+
     # get a list of recently played songs from triple j's recently played url
-    for songname,artist in recently_played_songs:
+    for song in recently_played_songs:
         # find each song and append it to a new songs list
-        playlist_new_songs.append(find_song_on_spotify(sp,songname,artist))
+        playlist_new_songs.append(find_song_on_spotify(sp, songname=song['track'], 
+                artist=song['artist']))
 
     # add the songs to the playlist
-    add_to_playlist(sp, playlist_new_songs)
+    add_to_playlist(sp,playlist_new_songs,playlist_name)
      
-    # find the songs in the list
-    find_song_on_spotify(sp,'Everybody','Logic')
-    
     logger.info('Program finished')
 
 
-def add_to_playlist(sp,songs_to_add):
+def add_to_playlist(sp,songs_to_add,playlist_name):
     '''Obtains the current playlist, and only add songs if they aren't already in the playlist
     '''
-    pass
+    logger.info('Adding songs to \'%s\'' % (playlist_name))
+    # get the currently stored songs
+    current_playlist = get_current_playlist(sp,playlist_name)
+
+    # get the details to modify the playlist
+    uid = sp.current_user()['id']
+    playlist_id = find_playlist(sp, uid, playlist_name)['id']
+    
+    for track_id in songs_to_add:
+        # ignore the track_id if it's already in the playlist
+        if track_id not in current_playlist:
+            logger.info('Adding song with id \'%s\' to playlist \'%s\'' 
+                       % (track_id,playlist_name))
+            track = [track_id]
+            # ammend the playlist
+            sp.user_playlist_add_tracks(uid,playlist_id,track)
+        else:
+            logger.info('Song with id \'%s\' already in playlist' % (track_id))
 
 
-def get_current_playlist(sp):
+def get_current_playlist(sp, playlist_name):
     '''Returns a list of songs from spotify that are in the current playlist'''
-    playlist = []
-    return playlist
+    ret_playlist = []
+    uid = sp.current_user()['id']
+    playlist_id = find_playlist(sp, uid, playlist_name)['id']
+    logger.info('Current playlist id \'%s\'' % (playlist_id))
+    playlist = sp.user_playlist(uid,playlist_id)
+    
+    # store only the track IDs in the current playlist list
+    for track in playlist['tracks']['items']:
+        ret_playlist.append(track['track']['id'])
+    
+    logger.info('Song ids already in playlist: %s' % (ret_playlist))
+    return ret_playlist
 
 
 def get_triple_j_recently_played():
     '''Get the list of recently played songs from triple j'''
-    songs = []
     logger.info('Getting songs from Triple J')
+    songs = []
+    songs.append({'track':'Everybody', 'artist':'Logic'})
     return songs
 
 
