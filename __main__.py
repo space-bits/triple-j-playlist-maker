@@ -81,15 +81,17 @@ def add_to_playlist(sp,songs_to_add,playlist_name):
     playlist_id = find_playlist(sp, uid, playlist_name)['id']
 
     for track_id in songs_to_add:
-        # ignore the track_id if it's already in the playlist
-        if track_id not in current_playlist and track_id is not None:
-            logger.info('Adding song with id \'%s\' to playlist \'%s\'' 
-                       % (track_id,playlist_name))
-            track = [track_id]
-            # ammend the playlist
-            sp.user_playlist_add_tracks(uid,playlist_id,track)
-        else:
-            logger.info('Song with id \'%s\' already in playlist' % (track_id))
+        if track_id is not None:
+            track_id = track_id.split(':')[2] # get the slice of the last segment
+            # ignore the track_id if it's already in the playlist
+            if track_id not in current_playlist:
+                logger.info('Adding song with id \'%s\' to playlist \'%s\'' 
+                           % (track_id,playlist_name))
+                track = [track_id]
+                # ammend the playlist
+                sp.user_playlist_add_tracks(uid,playlist_id,track)
+            else:
+                logger.info('Song with id \'%s\' already in playlist' % (track_id))
 
 
 def get_current_playlist(sp, playlist_name):
