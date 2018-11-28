@@ -51,7 +51,7 @@ def main():
         return
     # create the playlist, if it doesn't exist
     create_playlist(sp, username, playlist_name)
-    '''
+    
     recently_played_songs = get_triple_j_recently_played()
     # create an empty list for storing the songs to be added to the playlist
     playlist_new_songs = []
@@ -59,7 +59,6 @@ def main():
     for songname,artist in recently_played_songs:
         # find each song and append it to a new songs list
         playlist_new_songs.append(find_song_on_spotify(sp,songname,artist))
-    '''
 
     # add the songs to the playlist
     add_to_playlist(sp, playlist_new_songs)
@@ -70,11 +69,11 @@ def main():
     logger.info('Program finished')
 
 
-def add_to_playlist():
+def add_to_playlist(sp,songs_to_add):
     '''Obtains the current playlist, and only add songs if they aren't already in the playlist
     '''
-    
     pass
+
 
 def get_current_playlist(sp):
     '''Returns a list of songs from spotify that are in the current playlist'''
@@ -85,7 +84,7 @@ def get_current_playlist(sp):
 def get_triple_j_recently_played():
     '''Get the list of recently played songs from triple j'''
     songs = []
-    logger.inf('Getting songs from Triple J')
+    logger.info('Getting songs from Triple J')
     return songs
 
 
@@ -98,19 +97,19 @@ def find_song_on_spotify(sp,songname,artist):
     song = results['tracks']['items'][0]['uri']
     if song is None:
         logger.warn('Unable to find song')
-        return None
     logger.info('Spotify track id: \'%s\'' % (song))
     return song
 
 
 def create_playlist(sp,username,playlist_name):
     '''Determine if there is already a playlist, else create one'''
-    logger.info('Creating new playlist \'%s\' for the first time' % (playlist_name))
     playlist = None
     description = 'Playlist for Triple J\'s recently played songs.'
     
     playlist = find_playlist(sp,username,playlist_name)
     if playlist == None:
+        logger.info('Creating new playlist \'%s\' for the first time' % (playlist_name))
+        # get the userid and create the playlist
         uid = sp.current_user()['id']
         sp.user_playlist_create(user=uid, name=playlist_name,public=True)   
     return playlist
@@ -129,7 +128,6 @@ def find_playlist(sp, username, playlist_name):
                 ret_playlist = playlist
                 logger.info('Playlist \'%s\' already exists.' % (playlist['name']))
     
-    logger.info('Playlist \'%s\' doesn\'t exist yet.' % (playlist['name']))
     return ret_playlist
 
 
