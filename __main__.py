@@ -39,7 +39,7 @@ def main():
     logger.info('Application starting for user \'%s\'' % (username))
     
     # api endpoint for the triple j radio service
-    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=500'
+    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=250'
 
     # set the name for the playlist
     playlist_name = 'Triple J Recently Played'
