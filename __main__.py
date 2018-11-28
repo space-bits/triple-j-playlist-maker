@@ -108,9 +108,11 @@ def get_current_playlist(sp, playlist_name):
 
 
 def get_triple_j_recently_played():
-    '''Get the list of recently played songs from triple j'''
-    logger.info('Getting songs from Triple J')
+    '''Get the list of recently played songs from Triple J; Strip any song titles 
+    {feat. artist} as this query causes Spotify to return no tracks'''
+    logger.info('Getting songs from Triple J...')
     songs = []
+
     songs.append({'track':'Everybody', 'artist':'Logic'})
     return songs
 
@@ -142,7 +144,7 @@ def create_playlist(sp,username,playlist_name):
     return playlist
 
 
-def find_playlist(sp, username, playlist_name):
+def find_playlist(sp,username,playlist_name):
     '''Query the users playlist for if one already exists'''
     ret_playlist = None
     
@@ -175,7 +177,7 @@ def authenticate_account(username):
         logger.warn('Successfully got token. Scopes may have changed.')
     
     if not token or token is None:
-        logger.error('Unable to get token for %s' % (username))
+        logger.error('Unable to get token for \'%s\'' % (username))
         return None
     
     sp = spotipy.Spotify(auth=token)    
