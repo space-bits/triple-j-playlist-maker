@@ -1,6 +1,5 @@
 import os
-from json.decoder import JSONDecodeError
-import urllib.request
+import requests
 import logging
 
 import spotipy
@@ -38,8 +37,10 @@ def main():
     # my spotify username
     username = '011011000110111101110110011001'
     logger.info('Application starting for user \'%s\'' % (username))
+    
+    # api endpoint for the triple j radio service
+    triple_j_url = 'https://music.abcradio.net.au/api/v1/recordings/plays.json?limit=50&service=triplej'
 
-    triple_j_url = 'https://www.abc.net.au/triplej/featured-music/recently-played/'
     # set the name for the playlist
     playlist_name = 'Triple J Recently Played'
     
@@ -78,10 +79,10 @@ def add_to_playlist(sp,songs_to_add,playlist_name):
     # get the details to modify the playlist
     uid = sp.current_user()['id']
     playlist_id = find_playlist(sp, uid, playlist_name)['id']
-    
+
     for track_id in songs_to_add:
         # ignore the track_id if it's already in the playlist
-        if track_id not in current_playlist:
+        if track_id not in current_playlist and track_id is not None:
             logger.info('Adding song with id \'%s\' to playlist \'%s\'' 
                        % (track_id,playlist_name))
             track = [track_id]
@@ -112,8 +113,16 @@ def get_triple_j_recently_played():
     {feat. artist} as this query causes Spotify to return no tracks'''
     logger.info('Getting songs from Triple J...')
     songs = []
-
-    songs.append({'track':'Everybody', 'artist':'Logic'})
+    tracks = requests.get(
+            'https://music.abcradio.net.au/api/v1/recordings/plays.json?limit=5&service=triplej'
+            ).json()
+    # iterate over the json object and pull out the important data
+    for track in tracks['items']:
+        title = track['title']
+        artist = track['artists'][0]['name']
+        
+        logger.info('Found track \'%s\' by \'%s\'' % (title, artist))
+        songs.append({'track':title,'artist':artist})
     return songs
 
 
@@ -121,9 +130,12 @@ def find_song_on_spotify(sp,songname,artist):
     '''Method to find a song on Spotify to be added to the playlist'''
     logger.info('Finding song \'%s\', by \'%s\' on Spotify' % (songname,artist))
     # find the song in spotify's library, and return it
-    results = sp.search(q='artist:%s track:%s' % (artist,songname), limit=1)
+    results = sp.search(q='artist:%s track:%s' % (artist,songname), limit=1)['tracks']['items']
+    
     # returns the spotify:track:id of the particular song
-    song = results['tracks']['items'][0]['uri']
+    if results is None or len(results) == 0:
+        return None
+    song = results[0]['uri']
     if song is None:
         logger.warn('Unable to find song')
     logger.info('Spotify track id: \'%s\'' % (song))
@@ -140,7 +152,9 @@ def create_playlist(sp,username,playlist_name):
         logger.info('Creating new playlist \'%s\' for the first time' % (playlist_name))
         # get the userid and create the playlist
         uid = sp.current_user()['id']
-        sp.user_playlist_create(user=uid, name=playlist_name,public=True)   
+        sp.user_playlist_create(user=uid, name=playlist_name,public=True)
+    else:
+        logger.info('Playlist \'%s\' already exists.' % (playlist['name']))
     return playlist
 
 
@@ -155,7 +169,6 @@ def find_playlist(sp,username,playlist_name):
         if playlist['owner']['id'] == username:
             if playlist['name'] == playlist_name:
                 ret_playlist = playlist
-                logger.info('Playlist \'%s\' already exists.' % (playlist['name']))
     
     return ret_playlist
 
