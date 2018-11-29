@@ -19,8 +19,9 @@ ch.setLevel(logging.INFO)
 fh = logging.FileHandler('main.log')
 fh.setLevel(logging.INFO)
 # create formatter for both console and file
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
-                    datefmt='%m/%d/%Y %I:%M:%S %p')
+formatter = logging.Formatter(
+				'%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+                datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # add formatter to fh
 fh.setFormatter(formatter)
@@ -41,7 +42,7 @@ def main():
     logger.info('Application starting for user \'%s\'' % (username))
     
     # api endpoint for the triple j radio service
-    limit = '250'
+    limit = '150'
     triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=' + limit
 
     # set the name for the playlist
@@ -89,8 +90,7 @@ def add_to_playlist(sp,songs_to_add,playlist_name):
             track_id = track_id.split(':')[2] # get the slice of the last segment
             # ignore the track_id if it's already in the playlist
             if track_id not in current_playlist:
-                logger.info('Adding song with id \'%s\'  \
-                            to playlist \'%s\'' 
+                logger.info('Adding song with id \'%s\' to playlist \'%s\'' 
                             % (track_id,playlist_name))
                 track = [track_id]
                 # ammend the playlist
@@ -134,10 +134,10 @@ def get_triple_j_recently_played(triple_j_url):
             title = track['recording']['title'].split('{')[0].strip()
             artist = track['recording']['artists'][0]['name']
             logger.info('Found track \'%s\' by \'%s\'' % (title, artist))
-			
-			# only append songs which don't evaluate as being ignored
+            
+            # only append songs which don't evaluate as being ignored
             if song_is_ignored(track) is not None:
-				songs.append({'track':title,'artist':artist})
+                songs.append({'track':title,'artist':artist})
     return songs
 
 
@@ -149,30 +149,30 @@ def song_is_ignored(track):
         - None if from an ignored program,
         - Track if it is not from an ignored program
     '''
-	# ignore songs played on 'The Racket' 
-	# create played time as datetime object
-	played_at = dt.datetime.strptime(track['played_time'], 
-									'%Y-%m-%dT%H:%M:%S%z')
+    # ignore songs played on 'The Racket' 
+    # create played time as datetime object
+    played_at = dt.datetime.strptime(track['played_time'], 
+                                    '%Y-%m-%dT%H:%M:%S%z')
 
-	# determine if the song was played between 2200 on a tuesday
-	# and 0100 the following wednesday
-	the_racket = {'start_day':'tuesday', 
-				  'start_time': '2200',
-				  'end_day': 'wednesday', 
-				  'end_time': '0100'}
-	day_played = dt.datetime.strftime(played_at, '%A')
-	time_played = dt.datetime.strftime(played_at, '%T')
-	if day_played == the_racket['start_day'] and \
-		time_played > the_racket['start_time'] or \
-		day_played == the_racket['end_day'] and \
-		time_played < the_racket['end_time']:
-			# don't append the song if it is played in an ignored
-			# radio program
-			logger.info('Skipping song played during an \
-				ignored program')
-			return None
-	return track
-	   
+    # determine if the song was played between 2200 on a tuesday
+    # and 0100 the following wednesday
+    the_racket = {'start_day':'tuesday', 
+                  'start_time': '2200',
+                  'end_day': 'wednesday', 
+                  'end_time': '0100'}
+    day_played = dt.datetime.strftime(played_at, '%A')
+    time_played = dt.datetime.strftime(played_at, '%T')
+    if day_played == the_racket['start_day'] and \
+        time_played > the_racket['start_time'] or \
+        day_played == the_racket['end_day'] and \
+        time_played < the_racket['end_time']:
+            # don't append the song if it is played in an ignored
+            # radio program
+            logger.info('Skipping song played during an \
+                ignored program')
+            return None
+    return track
+       
 
 def find_song_on_spotify(sp,songname,artist):
     '''Method to find a song on Spotify to be added to the playlist'''
