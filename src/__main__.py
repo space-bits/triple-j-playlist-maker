@@ -1,6 +1,8 @@
 import os
 import requests
 import logging
+import datetime as dt
+import json
 
 import spotipy
 import spotipy.util as util
@@ -94,7 +96,7 @@ def add_to_playlist(sp,songs_to_add,playlist_name):
                 # ammend the playlist
                 try:
                     sp.user_playlist_add_tracks(uid,playlist_id,
-												track,position=0)
+                                                track,position=0)
                 except(Exception) as e:
                     logger.warn('Exception occured ' + e)
             else:
@@ -129,9 +131,31 @@ def get_triple_j_recently_played(triple_j_url):
         if track['service_id'] == 'triplej':
             title = track['recording']['title']
             artist = track['recording']['artists'][0]['name']
-            
             logger.info('Found track \'%s\' by \'%s\'' % (title, artist))
-            songs.append({'track':title,'artist':artist})
+            
+            # ignore songs played on 'The Racket' 
+            # create played time as datetime object
+            played_at = dt.datetime.strptime(track['played_time'], 
+                                            '%Y-%m-%dT%H-%M-%S%z')
+
+            # determine if the song was played between 2200 on a tuesday
+            # and 0100 the following wednesday
+            the_racket = {'start_day':'tuesday', 
+                          'start_time': '2200',
+                          'end_day': 'wednesday', 
+                          'end_time': '0100'}
+            day_played = dt.datetime.strftime(played_at, '%A')
+            time_played = dt.datetime.strftime(played_at, '%T')
+            if day_played == the_racket['start_day'] and 
+                time_played > the_racket['start_time'] or 
+                day_played == the_racket['end_day'] and 
+                time_played < the_racket['end_time']:
+                    # don't append the song if it is played in an ignored
+                    # radio program
+                    logger.info('Skipping song played during an \
+                        ignored proram')
+            else:
+                songs.append({'track':title,'artist':artist})
     return songs
 
 
