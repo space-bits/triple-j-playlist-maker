@@ -39,7 +39,8 @@ def main():
     logger.info('Application starting for user \'%s\'' % (username))
     
     # api endpoint for the triple j radio service
-    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=250'
+    limit = '250'
+    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=' + limit
 
     # set the name for the playlist
     playlist_name = 'Triple J Recently Played'
@@ -61,8 +62,8 @@ def main():
     for song in recently_played_songs:
         # find each song and append it to a new songs list
         songs_to_add.append(find_song_on_spotify(sp, 
-														songname=song['track'], 
-                						artist=song['artist']))
+                                                        songname=song['track'], 
+                                        artist=song['artist']))
 
     # add the songs to the playlist
     add_to_playlist(sp,songs_to_add,playlist_name)
@@ -80,18 +81,20 @@ def add_to_playlist(sp,songs_to_add,playlist_name):
     # get the details to modify the playlist
     uid = sp.current_user()['id']
     playlist_id = find_playlist(sp, uid, playlist_name)['id']
-		
+        
     for track_id in songs_to_add:
         if track_id is not None:
             track_id = track_id.split(':')[2] # get the slice of the last segment
             # ignore the track_id if it's already in the playlist
             if track_id not in current_playlist:
-                logger.info('Adding song with id \'%s\' to playlist \'%s\'' 
-                           % (track_id,playlist_name))
+                logger.info('Adding song with id \'%s\'  \
+                            to playlist \'%s\'' 
+                            % (track_id,playlist_name))
                 track = [track_id]
                 # ammend the playlist
                 try:
-                    sp.user_playlist_add_tracks(uid,playlist_id,track)
+                    sp.user_playlist_add_tracks(uid,playlist_id,
+												track,position=0)
                 except(Exception) as e:
                     logger.warn('Exception occured ' + e)
             else:
