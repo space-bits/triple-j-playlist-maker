@@ -52,7 +52,8 @@ def main():
     sp = authenticate_account(username)
     if sp is None:
         logger.error('Could not authenticate for spotify user %s' % (username)) 
-        return
+        return None
+
     # create the playlist, if it doesn't exist
     create_playlist(sp, username, playlist_name)
     
@@ -229,7 +230,7 @@ def authenticate_account(username):
     '''Authenticate the account and return the authenticated object.'''
     if username is None:
         logger.error('Username is None when attempting to auth. Quitting.')
-        return
+        return None
     
     scope = 'playlist-read-private playlist-modify-private playlist-modify-public'
     # try to get a new token or purge the old one if the scopes do not match    
