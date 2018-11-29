@@ -141,7 +141,7 @@ def get_triple_j_recently_played(triple_j_url):
     return songs
 
 
-def song_is_ignore(track):
+def song_is_ignored(track):
     '''Determines if a song is from an ignored program, 
     such as 'The Racket' 
     
