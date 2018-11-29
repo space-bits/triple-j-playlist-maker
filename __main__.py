@@ -55,16 +55,17 @@ def main():
     recently_played_songs = get_triple_j_recently_played(triple_j_url)
     
     # create an empty list for storing the songs to be added to the playlist
-    playlist_new_songs = []
+    songs_to_add = []
 
     # get a list of recently played songs from triple j's recently played url
     for song in recently_played_songs:
         # find each song and append it to a new songs list
-        playlist_new_songs.append(find_song_on_spotify(sp, songname=song['track'], 
-                artist=song['artist']))
+        songs_to_add.append(find_song_on_spotify(sp, 
+														songname=song['track'], 
+                						artist=song['artist']))
 
     # add the songs to the playlist
-    add_to_playlist(sp,playlist_new_songs,playlist_name)
+    add_to_playlist(sp,songs_to_add,playlist_name)
      
     logger.info('Program finished')
 
@@ -72,14 +73,14 @@ def main():
 def add_to_playlist(sp,songs_to_add,playlist_name):
     '''Obtains the current playlist, and only add songs if they aren't already in the playlist
     '''
-    logger.info('Adding songs to \'%s\'' % (playlist_name))
+    logger.info('Adding songs, \'%s\', to \'%s\'' % (songs_to_add,playlist_name))
     # get the currently stored songs
     current_playlist = get_current_playlist(sp,playlist_name)
 
     # get the details to modify the playlist
     uid = sp.current_user()['id']
     playlist_id = find_playlist(sp, uid, playlist_name)['id']
-
+		
     for track_id in songs_to_add:
         if track_id is not None:
             track_id = track_id.split(':')[2] # get the slice of the last segment
