@@ -120,8 +120,9 @@ def get_current_playlist(sp, playlist_name):
 
 
 def get_triple_j_recently_played(triple_j_url):
-    '''Get the list of recently played songs from Triple J; Strip any song titles 
-    {feat. artist} as this query causes Spotify to return no tracks'''
+    '''Get the list of recently played songs from Triple J
+	Strip any {feat. artist} from song titles as this 
+	query causes Spotify to return no tracks'''
     logger.info('Getting songs from Triple J...')
     songs = []
     tracks = requests.get(triple_j_url).json()
@@ -129,14 +130,15 @@ def get_triple_j_recently_played(triple_j_url):
     # iterate over the json object and pull out the important data
     for track in tracks['items']:
         if track['service_id'] == 'triplej':
-            title = track['recording']['title']
+			# strip the {feat xyz} from the title
+            title = track['recording']['title'].split('{')[0].strip()
             artist = track['recording']['artists'][0]['name']
             logger.info('Found track \'%s\' by \'%s\'' % (title, artist))
             
             # ignore songs played on 'The Racket' 
             # create played time as datetime object
             played_at = dt.datetime.strptime(track['played_time'], 
-                                            '%Y-%m-%dT%H-%M-%S%z')
+                                            '%Y-%m-%dT%H:%M:%S%z')
 
             # determine if the song was played between 2200 on a tuesday
             # and 0100 the following wednesday
@@ -146,9 +148,9 @@ def get_triple_j_recently_played(triple_j_url):
                           'end_time': '0100'}
             day_played = dt.datetime.strftime(played_at, '%A')
             time_played = dt.datetime.strftime(played_at, '%T')
-            if day_played == the_racket['start_day'] and 
-                time_played > the_racket['start_time'] or 
-                day_played == the_racket['end_day'] and 
+            if day_played == the_racket['start_day'] and \
+            	time_played > the_racket['start_time'] or \
+                day_played == the_racket['end_day'] and \
                 time_played < the_racket['end_time']:
                     # don't append the song if it is played in an ignored
                     # radio program
@@ -161,9 +163,11 @@ def get_triple_j_recently_played(triple_j_url):
 
 def find_song_on_spotify(sp,songname,artist):
     '''Method to find a song on Spotify to be added to the playlist'''
-    logger.info('Finding song \'%s\', by \'%s\' on Spotify' % (songname,artist))
+    logger.info('Finding song \'%s\', by \'%s\' on Spotify' 
+				% (songname,artist))
     # find the song in spotify's library, and return it
-    results = sp.search(q='artist:%s track:%s' % (artist,songname), limit=1)['tracks']['items']
+    results = sp.search(q='artist:%s track:%s' % (artist,songname), 
+						limit=1)['tracks']['items']
     
     # returns the spotify:track:id of the particular song
     if results is None or len(results) == 0:
@@ -182,12 +186,14 @@ def create_playlist(sp,username,playlist_name):
     
     playlist = find_playlist(sp,username,playlist_name)
     if playlist == None:
-        logger.info('Creating new playlist \'%s\' for the first time' % (playlist_name))
+        logger.info('Creating new playlist \'%s\' for the first time' 
+					% (playlist_name))
         # get the userid and create the playlist
         uid = sp.current_user()['id']
         sp.user_playlist_create(user=uid, name=playlist_name,public=True)
     else:
-        logger.info('Playlist \'%s\' already exists.' % (playlist['name']))
+        logger.info('Playlist \'%s\' already exists.' 
+					% (playlist['name']))
     return playlist
 
 
@@ -196,8 +202,8 @@ def find_playlist(sp,username,playlist_name):
     ret_playlist = None
     
     playlists = sp.user_playlists(username)
-    # iterate over the collection and only get the playlists which are owned by user with 
-    # the specified username
+    # iterate over the collection and only get the playlists which 
+	# are owned by user 
     for playlist in playlists['items']:
         if playlist['owner']['id'] == username:
             if playlist['name'] == playlist_name:
