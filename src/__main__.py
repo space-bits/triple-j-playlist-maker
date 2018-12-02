@@ -42,7 +42,7 @@ def main():
     logger.info('Application starting for user \'%s\'' % (username))
     
     # api endpoint for the triple j radio service
-    limit = '150'
+    limit = '50'
     triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=' + limit
 
     # set the name for the playlist
