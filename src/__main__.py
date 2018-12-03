@@ -7,6 +7,8 @@ import json
 import spotipy
 import spotipy.util as util
 
+from apis.TripleJAPI import TripleJ
+
 
 # create the logger
 logger = logging.getLogger(__name__)
@@ -20,7 +22,7 @@ fh = logging.FileHandler('main.log')
 fh.setLevel(logging.INFO)
 # create formatter for both console and file
 formatter = logging.Formatter(
-				'%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
+                '%(asctime)s - %(name)s - %(levelname)s - %(message)s', 
                 datefmt='%m/%d/%Y %I:%M:%S %p')
 
 # add formatter to fh
@@ -43,7 +45,9 @@ def main():
     
     # api endpoint for the triple j radio service
     limit = '50'
-    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc&limit=' + limit
+    triple_j_url = 'https://music.abcradio.net.au/api/v1/plays.json?order=desc'
+    # create the api to perform the queries    
+    triple_j_api = TripleJ(triple_j_url,limit,logger)
 
     # set the name for the playlist
     playlist_name = 'Triple J Recently Played'
@@ -139,10 +143,10 @@ def get_triple_j_recently_played(triple_j_url):
             # only append songs which don't evaluate as being ignored
             if song_is_ignored(track) is not None:
                 songs.append({'track':title,'artist':artist})
-	
-	# make sure the song played most recently is added first
+    
+    # make sure the song played most recently is added first
     songs.reverse() 
-	return songs
+    return songs
 
 
 def song_is_ignored(track):
