@@ -139,7 +139,10 @@ def get_triple_j_recently_played(triple_j_url):
             # only append songs which don't evaluate as being ignored
             if song_is_ignored(track) is not None:
                 songs.append({'track':title,'artist':artist})
-    return songs
+	
+	# make sure the song played most recently is added first
+    songs.reverse() 
+	return songs
 
 
 def song_is_ignored(track):
