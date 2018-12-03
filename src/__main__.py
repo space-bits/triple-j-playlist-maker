@@ -61,7 +61,7 @@ def main():
     # create the playlist, if it doesn't exist
     create_playlist(sp, username, playlist_name)
     
-    recently_played_songs = get_triple_j_recently_played(triple_j_url)
+    recently_played_songs = triple_j_api.get_songs() 
     
     # create an empty list for storing the songs to be added to the playlist
     songs_to_add = []
