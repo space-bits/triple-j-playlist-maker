@@ -1,25 +1,18 @@
-import logging
+import json
+from datetime import datetime, timezone
 
 
-# create the logger
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+metadata = {
+  'system': 'triple-j-playlist-maker',
+  'timestamp': datetime.now(timezone.utc).strftime("%Y-%m-%d:%H:%M:%S%Z")
+}
 
-# create console handler and set level to debug
-ch = logging.StreamHandler()
-ch.setLevel(logging.INFO)
-# define the file to log to
-fh = logging.FileHandler('main.log')
-fh.setLevel(logging.INFO)
-# create formatter for both console and file
-formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                datefmt='%m/%d/%Y %I:%M:%S %p')
+class StructuredMessage(object):
+  def __init__(self, message, **kwargs):
+    self.message = message
+    self.kwargs = kwargs
 
-# add formatter to fh
-fh.setFormatter(formatter)
-# add formatter to ch
-ch.setFormatter(formatter)
-# add ch to logger
-logger.addHandler(ch)
-logger.addHandler(fh)
+  def __str__(self):
+    return '{\"message\": \"%s\", "metadata": %s, "extras": %s}' % (self.message, json.dumps(metadata), json.dumps(self.kwargs))
+
+_ = StructuredMessage
